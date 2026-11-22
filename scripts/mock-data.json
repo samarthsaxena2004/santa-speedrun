@@ -1,0 +1,30 @@
+{
+  "_note": "Offline rehearsal data for `npm run mock`. NOT real products. Never record your submission in mock mode.",
+  "shelves": [
+    { "query": "heated neck massager", "items": [
+      { "id": "1a", "title": "[MOCK] Heated Shiatsu Neck Massager", "price": "$49.00", "store": "Mock Store", "url": "#mock-1a", "image": "", "rating": { "value": 4.7, "count": 120 } },
+      { "id": "1b", "title": "[MOCK] Cordless Back Wrap", "price": "$39.00", "store": "Mock Store", "url": "#mock-1b", "image": "", "rating": null } ] },
+    { "query": "funny dad mug", "items": [
+      { "id": "2a", "title": "[MOCK] 'I Don't Need Anything' Mug", "price": "$18.00", "store": "Mock Store", "url": "#mock-2a", "image": "", "rating": null },
+      { "id": "2b", "title": "[MOCK] World's Okayest Dad Mug", "price": "$16.00", "store": "Mock Store", "url": "#mock-2b", "image": "", "rating": null } ] },
+    { "query": "grill tool set", "items": [
+      { "id": "3a", "title": "[MOCK] 5-Piece Grill Master Set", "price": "$42.00", "store": "Mock Store", "url": "#mock-3a", "image": "", "rating": null },
+      { "id": "3b", "title": "[MOCK] Engraved Spatula", "price": "$25.00", "store": "Mock Store", "url": "#mock-3b", "image": "", "rating": null } ] },
+    { "query": "wool socks", "items": [
+      { "id": "4a", "title": "[MOCK] Merino Hiking Socks 3-Pack", "price": "$34.00", "store": "Mock Store", "url": "#mock-4a", "image": "", "rating": null },
+      { "id": "4b", "title": "[MOCK] Fuzzy Cabin Socks", "price": "$15.00", "store": "Mock Store", "url": "#mock-4b", "image": "", "rating": null } ] },
+    { "query": "bluetooth tracker tag", "items": [
+      { "id": "5a", "title": "[MOCK] Key Finder Tag 2-Pack", "price": "$29.00", "store": "Mock Store", "url": "#mock-5a", "image": "", "rating": null },
+      { "id": "5b", "title": "[MOCK] Wallet Tracker Card", "price": "$35.00", "store": "Mock Store", "url": "#mock-5b", "image": "", "rating": null } ] }
+  ],
+  "answer": {
+    "roast": "MOCK ROAST: says he wants nothing, owns nothing newer than 2009, and that's the problem.",
+    "gifts": [
+      { "id": "1a", "title": "[MOCK] Heated Shiatsu Neck Massager", "price": "$49.00", "store": "Mock Store", "url": "#mock-1a", "why": "For the back he blames on 'sleeping wrong'", "tag": "Sit down, Dad. Doctor's orders." },
+      { "id": "2a", "title": "[MOCK] 'I Don't Need Anything' Mug", "price": "$18.00", "store": "Mock Store", "url": "#mock-2a", "why": "Finally, a mug that agrees with him", "tag": "You asked for nothing. Here's nothing, in mug form." },
+      { "id": "3a", "title": "[MOCK] 5-Piece Grill Master Set", "price": "$42.00", "store": "Mock Store", "url": "#mock-3a", "why": "Upgrade from the fork he's used since 1998", "tag": "Burgers on you this summer." },
+      { "id": "4a", "title": "[MOCK] Merino Hiking Socks 3-Pack", "price": "$34.00", "store": "Mock Store", "url": "#mock-4a", "why": "Dads secretly love good socks", "tag": "Warm toes, warmer heart." },
+      { "id": "5a", "title": "[MOCK] Key Finder Tag 2-Pack", "price": "$29.00", "store": "Mock Store", "url": "#mock-5a", "why": "Ends the daily 'who moved my keys' search", "tag": "Nobody moved them. Now you'll know." }
+    ]
+  }
+}
