@@ -1,0 +1,24 @@
+{
+  "name": "santa-speedrun",
+  "version": "1.0.0",
+  "description": "Secret Santa in seconds: 5 real gifts from real stores. Kimi K3.1 Pro on Cerebras, via OpenClaw. #KimiOnCerebras",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.16.0 <25 || >=26.1.0"
+  },
+  "scripts": {
+    "setup": "node setup.mjs",
+    "gateway": "node scripts/gateway.mjs",
+    "start": "node server.mjs",
+    "mock": "node server.mjs --mock",
+    "check:shop": "node scripts/check-shop.mjs",
+    "check:kimi": "node scripts/check-kimi.mjs",
+    "check:gateway": "node scripts/check-gateway.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^3.25.76"
+  }
+}
