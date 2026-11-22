@@ -115,13 +115,13 @@ const config = {
         params: { maxTokens: 2500 },
         tools: { allow: ["elf__find_gifts"] },
       },
-      // Lean twin for the Speed Bounty run (plain list output, temperature 0).
+      // Lean twin for the Speed Bounty run. Temperature 1 measured fastest (see docs/SPEED_BOUNTY.md).
       speedy: {
         name: "Santa's Speedy Shopper",
         workspace: WORKSPACE_SPEEDY,
         model: `cerebras/${MODEL_ID}`,
         thinkingDefault: "low",
-        params: { maxTokens: 1500, temperature: 0 },
+        params: { maxTokens: 1500, temperature: 1 },
         tools: { allow: ["elf__find_gifts"] },
       },
     },
