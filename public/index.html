@@ -2,233 +2,526 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Santa Speedrun · Kimi K3.1 Pro on Cerebras</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎅</text></svg>" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Santa Speedrun</title>
+<meta name="description" content="Describe anyone in one line. Get five real gifts from real stores in seconds." />
+<meta name="theme-color" content="#f5f0e6" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='8' fill='%23ff5a2b'/%3E%3Cpath d='M15.8 4 7.6 15.6h5.5L11.5 24 20.4 12h-5.7z' fill='%23141311'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist+Mono:wght@400..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #0b1020;
-    --panel: #121a33;
-    --panel-2: #0f1630;
-    --line: #23305a;
-    --text: #eef2ff;
-    --muted: #93a0c8;
-    --red: #ff4d5e;
-    --green: #2fd480;
-    --gold: #ffcc4d;
-    --cere: #ff7a1a;
-    --slow: #7d8bb3;
+    color-scheme: light;
+    --ink: #141311;
+    --ink-2: #4a463f;
+    --ink-3: #7b756a;
+    --paper: #f5f0e6;
+    --card: #fffdf8;
+    --vermilion: #ff5630;
+    --butter: #ffc92e;
+    --lilac: #ac9bff;
+    --mint: #4ed8a2;
+    --sky: #78c9ff;
+    --night-2: #2a2824;
+    --night-3: #a59f93;
+    --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    --serif: "Instrument Serif", ui-serif, Georgia, serif;
+    --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --gutter: 24px;
+    --hang: 22px;
+    --spring: cubic-bezier(.2, 1.2, .3, 1);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
+  html, body { margin: 0; }
   body {
-    background:
-      radial-gradient(1200px 600px at 15% -10%, #1d2b5c 0%, transparent 60%),
-      radial-gradient(900px 500px at 110% 0%, #3a1630 0%, transparent 55%),
-      var(--bg);
-    color: var(--text);
-    font: 15px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100dvh;
+    color: var(--ink);
+    background: var(--paper);
+    font: 400 15px/1.35 var(--display);
+    -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
-  #snow { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-  .wrap { position: relative; z-index: 1; max-width: 1360px; margin: 0 auto; padding: 18px 24px 28px; }
+  button, textarea { font: inherit; color: inherit; }
+  h3, p, ol { margin: 0; padding: 0; }
+  ol { list-style: none; }
+  :focus-visible { outline: 2.5px solid var(--ink); outline-offset: 2px; border-radius: 6px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  .brand { display: flex; align-items: baseline; gap: 12px; }
-  .brand h1 { margin: 0; font-size: 30px; letter-spacing: -0.02em; }
-  .brand h1 .zap { color: var(--gold); }
-  .brand .sub { color: var(--muted); font-size: 14px; }
-  .pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-  .pill { border: 1px solid var(--line); background: rgba(255,255,255,0.03); padding: 5px 10px; border-radius: 999px; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
-  .pill b { color: var(--text); font-weight: 600; }
-  #mockBanner { display: none; margin-top: 10px; background: #5a1020; border: 1px solid var(--red); color: #ffd6db; padding: 8px 12px; border-radius: 10px; font-weight: 600; }
+  .app { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; }
 
-  .ask { margin-top: 16px; display: flex; gap: 10px; }
-  .ask input {
-    flex: 1; font-size: 20px; padding: 14px 16px; border-radius: 14px;
-    border: 1px solid var(--line); background: var(--panel); color: var(--text); outline: none;
+  /* Living background: slow color fields under a dot grid that reacts to the agent */
+  .aurora { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .aurora i { position: absolute; display: block; border-radius: 50%; will-change: transform; animation: drift var(--t) ease-in-out infinite alternate; }
+  .aurora i:nth-child(1) { left: -12vw; top: -26vh; width: 62vw; height: 78vh; --t: 26s; --x: 9vw; --y: 7vh; background: radial-gradient(closest-side, rgba(255, 205, 120, .52), transparent); }
+  .aurora i:nth-child(2) { right: -14vw; top: -18vh; width: 58vw; height: 74vh; --t: 31s; --x: -8vw; --y: 10vh; background: radial-gradient(closest-side, rgba(190, 172, 255, .46), transparent); }
+  .aurora i:nth-child(3) { left: 18vw; bottom: -34vh; width: 58vw; height: 76vh; --t: 37s; --x: 10vw; --y: -7vh; background: radial-gradient(closest-side, rgba(126, 226, 186, .34), transparent); }
+  .aurora i:nth-child(4) { right: 4vw; bottom: -30vh; width: 44vw; height: 64vh; --t: 29s; --x: -11vw; --y: -5vh; background: radial-gradient(closest-side, rgba(255, 150, 120, .3), transparent); }
+  @keyframes drift { to { transform: translate3d(var(--x), var(--y), 0) scale(1.08); } }
+  #field, #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #field { z-index: 0; }
+  #confetti { z-index: 15; }
+
+  /* Top bar */
+  .bar { flex: none; height: 60px; padding: 0 var(--gutter); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .mark { display: inline-flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font-weight: 750; font-size: 18px; letter-spacing: -.025em; }
+  .mark svg { width: 28px; height: 28px; display: block; }
+  .stack { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 550; white-space: nowrap; }
+  .stack span { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border-radius: 99px; background: var(--card); }
+  .stack span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); }
+  #mockBanner { display: none; flex: none; margin: 0 var(--gutter) 10px; padding: 9px 14px; border-radius: 10px; background: #c8102e; color: #fff; font-weight: 700; font-size: 14px; }
+
+  main { flex: 1; min-height: 0; padding: 0 var(--gutter) max(var(--gutter), env(safe-area-inset-bottom)); display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 14px; }
+
+  main > .ask { grid-row: 1; }
+  main > .live { grid-row: 2; }
+  main > .line { grid-row: 3; }
+  main > .race { grid-row: 4; }
+
+  /* Prompt: the sentence is the headline */
+  .ask { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .ask label { font-size: 15px; font-weight: 600; color: var(--ink-2); letter-spacing: -.01em; }
+  .field { display: flex; align-items: flex-end; gap: 18px; }
+  #prompt {
+    flex: 1; min-width: 0; display: block; padding: 0; border: 0; outline: 0; resize: none; overflow: hidden;
+    background: transparent; caret-color: var(--vermilion);
+    font-family: var(--display); font-weight: 700; font-variation-settings: "opsz" 96;
+    font-size: clamp(38px, 5.5vw, 92px); line-height: 1; letter-spacing: -.042em;
   }
-  .ask input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,204,77,0.15); }
-  .ask button {
-    font-size: 18px; font-weight: 700; padding: 0 22px; border-radius: 14px; border: 0; cursor: pointer;
-    background: linear-gradient(180deg, #ff6372, #e23447); color: white;
+  #prompt::placeholder { color: rgba(20, 19, 17, .26); opacity: 1; }
+  #go {
+    flex: none; height: 60px; padding: 0 26px; border: 0; border-radius: 99px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--ink); color: var(--paper); font-weight: 700; font-size: 18px; letter-spacing: -.02em;
+    transition: transform .18s var(--spring), background .15s;
   }
-  .ask button:disabled { opacity: 0.6; cursor: default; }
-  .presets { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  #go svg { width: 20px; height: 20px; transition: transform .2s var(--spring); }
+  #go:hover { background: var(--vermilion); color: var(--ink); }
+  #go:hover svg { transform: translateX(3px); }
+  #go:active { transform: scale(.96); }
+  #go:disabled { cursor: progress; background: #38342e; color: var(--paper); }
+  #go:disabled svg { animation: nudge .62s ease-in-out infinite alternate; }
+  @keyframes nudge { to { transform: translateX(4px); } }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; }
   .presets button {
-    border: 1px dashed var(--line); background: transparent; color: var(--muted);
-    padding: 6px 10px; border-radius: 10px; cursor: pointer; font-size: 13px;
+    height: 36px; padding: 0 13px 0 5px; border: 0; border-radius: 99px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px; background: var(--card);
+    font-size: 14px; font-weight: 600; letter-spacing: -.012em;
+    transition: transform .18s var(--spring), background .15s;
   }
-  .presets button:hover { color: var(--text); border-color: var(--muted); }
-  .presets kbd { font: 11px ui-monospace, Menlo, monospace; color: var(--gold); margin-right: 4px; }
+  .presets button:hover { background: var(--c); transform: translateY(-2px); }
+  .presets kbd { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--c); font: 600 12px var(--mono); }
 
-  .lanes { margin-top: 16px; display: grid; grid-template-columns: 1fr 330px; gap: 14px; }
-  .lane { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; min-height: 470px; }
-  .lane.fast { border-color: rgba(255,122,26,0.45); box-shadow: 0 0 0 1px rgba(255,122,26,0.12), 0 20px 60px -30px rgba(255,122,26,0.5); }
-  .lane-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .lane-title { font-weight: 700; font-size: 15px; }
-  .lane-title small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
-  .timer { font: 700 40px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-  .fast .timer { color: var(--cere); }
-  .slow .timer { color: var(--slow); font-size: 30px; }
-  .timer .u { font-size: 0.5em; margin-left: 2px; color: var(--muted); }
+  body:not([data-state="idle"]) .ask { grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 14px; }
+  body:not([data-state="idle"]) .ask label { display: none; }
+  body:not([data-state="idle"]) .field { align-items: center; min-height: 54px; padding: 5px 5px 5px 20px; border-radius: 99px; background: var(--card); }
+  body:not([data-state="idle"]) #prompt { font-size: clamp(18px, 1.55vw, 23px); line-height: 1.2; letter-spacing: -.022em; font-weight: 650; font-variation-settings: "opsz" 24; }
+  body:not([data-state="idle"]) #go { height: 44px; padding: 0 18px; font-size: 15px; }
+  body:not([data-state="idle"]) .presets { flex-wrap: nowrap; gap: 5px; }
+  body:not([data-state="idle"]) .presets button { width: 40px; height: 40px; padding: 0; justify-content: center; background: transparent; }
+  body:not([data-state="idle"]) .presets button span { display: none; }
+  body:not([data-state="idle"]) .presets kbd { width: 36px; height: 36px; font-size: 13px; transition: box-shadow .16s, transform .18s var(--spring); }
+  body:not([data-state="idle"]) .presets button:hover { background: transparent; transform: none; }
+  body:not([data-state="idle"]) .presets button:hover kbd { transform: translateY(-2px); }
+  body:not([data-state="idle"]) .presets button.on kbd { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
 
-  .status { margin-top: 8px; color: var(--muted); font-size: 14px; min-height: 20px; }
-  .status b { color: var(--text); }
-  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; min-height: 28px; }
-  .chip { font-size: 12.5px; padding: 4px 9px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); transition: all .2s; }
-  .chip.done { color: var(--text); border-color: rgba(47,212,128,0.5); }
-  .chip.done::before { content: "✓ "; color: var(--green); }
-  .chip.err { border-color: var(--red); }
-
-  .roast { margin-top: 12px; font-size: 18px; font-style: italic; min-height: 26px; color: #ffe2a8; }
-  .roast:empty::before { content: ""; }
-
-  .cards { margin-top: 12px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-  .card {
-    background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
-    display: flex; flex-direction: column; min-height: 300px; position: relative;
+  /* Live run */
+  .live { display: none; grid-template-columns: minmax(0, 1fr) minmax(420px, auto); align-items: start; gap: 28px; }
+  body:not([data-state="idle"]) .live { display: grid; }
+  .roast { min-height: 2.14em; font: italic 400 clamp(25px, 2.55vw, 40px)/1.07 var(--serif); letter-spacing: -.012em; text-wrap: balance; }
+  .roast.typing::after { content: ""; display: inline-block; width: .06em; height: .8em; margin-left: .09em; vertical-align: -.07em; background: var(--vermilion); animation: caret .68s steps(2, jump-none) infinite; }
+  @keyframes caret { to { opacity: 0; } }
+  .pipeline { display: grid; gap: 8px; justify-items: end; min-width: 0; max-width: 620px; }
+  .steps { display: flex; gap: 4px; }
+  .steps li {
+    height: 30px; padding: 0 11px 0 8px; border-radius: 99px; display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; color: var(--ink-3); font-size: 13px; font-weight: 600; white-space: nowrap;
+    transition: background .15s, color .15s;
   }
-  .card.ph { border-style: dashed; opacity: 0.45; display: grid; place-items: center; color: var(--muted); font-size: 28px; }
-  .card.pop { animation: pop .35s cubic-bezier(.2,1.4,.4,1); }
-  @keyframes pop { from { transform: scale(.85) translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
-  .card .img { aspect-ratio: 1 / 1; background: #fff center/contain no-repeat; display: grid; place-items: center; font-size: 46px; }
-  .card .body { padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
-  .card .title { font-weight: 650; font-size: 13.5px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .card .meta { font-size: 12.5px; color: var(--muted); }
-  .card .meta b { color: var(--gold); font-size: 14px; }
-  .card .why { font-size: 12.5px; color: #cfd7f5; }
-  .card .tag { font-family: "Segoe Print", "Bradley Hand", "Snell Roundhand", "Comic Sans MS", cursive; font-size: 13px; color: #ffd6db; margin-top: auto; }
-  .card a.go { font-size: 12px; color: var(--green); text-decoration: none; word-break: break-all; }
-  .card a.go:hover { text-decoration: underline; }
-  .card .n { position: absolute; top: 8px; left: 8px; background: var(--red); color: white; font-weight: 800; font-size: 12px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; }
+  .steps i { position: relative; flex: none; width: 14px; height: 14px; border-radius: 50%; background: rgba(20, 19, 17, .11); }
+  .steps time { font: 500 11.5px var(--mono); opacity: .68; }
+  .steps li.active { background: var(--ink); color: var(--paper); }
+  .steps li.active i { background: transparent; border: 2px solid rgba(255, 255, 255, .24); border-top-color: var(--vermilion); animation: spin .68s linear infinite; }
+  .steps li.done { background: var(--card); color: var(--ink); }
+  .steps li.done i { background: var(--mint); animation: tick .3s var(--spring); }
+  .steps li.done i::after { content: ""; position: absolute; left: 4.6px; top: 2.3px; width: 4px; height: 7px; border: solid var(--ink); border-width: 0 1.6px 1.6px 0; transform: rotate(42deg); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes tick { from { transform: scale(.3); } }
+  .chips { display: flex; justify-content: flex-end; flex-wrap: nowrap; gap: 4px; min-height: 24px; max-width: 100%; overflow: hidden; }
+  .chip { flex: 0 1 auto; min-width: 0; max-width: 150px; height: 24px; padding: 0 8px; border-radius: 6px; font: 500 11.5px/24px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); background: rgba(255, 253, 248, .72); animation: chipIn .24s var(--spring) both; animation-delay: calc(var(--n) * 28ms); transition: background .16s, color .16s; }
+  @keyframes chipIn { from { transform: translateY(6px); opacity: 0; } }
+  .chip.done { background: var(--c); color: var(--ink); }
+  .chip.err { background: #f6c5cc; color: #7c0d20; }
+  #result { display: none; font-weight: 700; font-size: 16px; letter-spacing: -.02em; }
+  #result small { margin-left: 8px; font: 500 12.5px var(--mono); letter-spacing: 0; color: var(--ink-2); }
+  body[data-state="done"] #result { display: block; }
+  body[data-state="done"] .chips { display: none; }
+  #err { display: none; grid-column: 1 / -1; padding: 10px 14px; border-radius: 10px; background: #fbd9dd; color: #7c0d20; font-size: 14px; font-weight: 550; white-space: pre-wrap; }
 
-  .result { margin-top: 12px; display: none; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .result .big { font-size: 20px; font-weight: 800; color: var(--green); }
-  .result .small { color: var(--muted); font-size: 13px; }
-
-  .slow .stream {
-    margin-top: 10px; height: 250px; overflow: hidden; background: #0a0f22; border: 1px solid var(--line); border-radius: 10px;
-    padding: 8px; font: 11px/1.35 ui-monospace, Menlo, Consolas, monospace; color: #8592bb; white-space: pre-wrap; word-break: break-all;
-    display: flex; flex-direction: column-reverse;
+  /* The garland */
+  .line { position: relative; min-height: 0; }
+  .string { position: absolute; top: 0; left: calc(var(--gutter) * -1); width: calc(100% + var(--gutter) * 2); height: 40px; overflow: visible; pointer-events: none; }
+  .string path { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .tags { position: relative; height: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .tag {
+    --sag: 10px; --rest: 0deg;
+    position: relative; height: calc(100% - var(--sag) - var(--hang)); margin-top: calc(var(--sag) + var(--hang));
+    transform: rotate(var(--rest)); transform-origin: 50% calc(var(--hang) * -1);
+    filter: drop-shadow(0 12px 14px rgba(20, 19, 17, .18));
+    transition: transform .25s var(--spring);
   }
-  .slow .progress { margin-top: 10px; height: 8px; background: #0a0f22; border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
-  .slow .progress i { display: block; height: 100%; width: 0; background: var(--slow); }
-  .slow .count { margin-top: 6px; font-size: 13px; color: var(--muted); }
-  .slow .note { margin-top: 10px; font-size: 11.5px; color: #6f7ba3; line-height: 1.35; }
+  .tag:nth-child(1) { --c: var(--vermilion); --soft: #ffd2c2; --sag: 10px; --rest: -1.3deg; }
+  .tag:nth-child(2) { --c: var(--butter); --soft: #fff0bd; --sag: 20px; --rest: .9deg; }
+  .tag:nth-child(3) { --c: var(--lilac); --soft: #e6e0ff; --sag: 24px; --rest: -.6deg; }
+  .tag:nth-child(4) { --c: var(--mint); --soft: #cdf6e4; --sag: 20px; --rest: 1.1deg; }
+  .tag:nth-child(5) { --c: var(--sky); --soft: #d8f0ff; --sag: 10px; --rest: -1deg; }
+  .tag::before { content: ""; position: absolute; z-index: 2; left: calc(50% - 1px); top: calc(var(--hang) * -1 - 1px); width: 2px; height: calc(var(--hang) + 19px); background: var(--ink); border-radius: 2px; }
+  .tag-body {
+    position: relative; height: 100%; padding: 38px 12px 12px; display: flex; flex-direction: column; gap: 6px;
+    background: var(--c); border-radius: 0 0 18px 18px;
+    clip-path: polygon(24px 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%, 0 24px);
+    -webkit-mask: radial-gradient(circle 8px at 50% 18px, transparent 97%, #000);
+            mask: radial-gradient(circle 8px at 50% 18px, transparent 97%, #000);
+  }
+  .tag.blank .tag-body { padding: 34px 8px 8px; display: grid; place-items: center; }
+  .blank-n { font-weight: 800; font-size: clamp(70px, 9.5vw, 168px); line-height: .8; letter-spacing: -.06em; font-variation-settings: "opsz" 96; color: rgba(20, 19, 17, .9); }
+  body:not([data-state="idle"]) .tag.blank .tag-body { overflow: hidden; background: color-mix(in srgb, var(--c) 44%, var(--paper)); }
+  body:not([data-state="idle"]) .tag.blank .blank-n { color: rgba(20, 19, 17, .17); font-size: clamp(48px, 6vw, 96px); }
+  /* Opacity only, so waiting tags stay on the compositor and never slow the live timer. */
+  body[data-state="running"] .tag.blank { animation: breathe 1.25s ease-in-out infinite alternate; animation-delay: calc(var(--d) * 130ms); }
+  @keyframes breathe { to { opacity: .58; } }
+  body[data-state="idle"] .tag { animation: sway 5.5s ease-in-out infinite alternate; animation-delay: calc(var(--d) * -1.1s); }
+  @keyframes sway { from { transform: rotate(calc(var(--rest) - 1.3deg)); } to { transform: rotate(calc(var(--rest) + 1.3deg)); } }
+  .tag.land { animation: hang .78s both; }
+  @keyframes hang {
+    0% { transform: translateY(-46px) rotate(-11deg); opacity: 0; }
+    26% { transform: translateY(0) rotate(8deg); opacity: 1; }
+    48% { transform: rotate(-4.5deg); }
+    68% { transform: rotate(2.4deg); }
+    85% { transform: rotate(-.9deg); }
+    100% { transform: rotate(var(--rest)); }
+  }
+  .tag.filled:hover { transform: rotate(0deg) translateY(3px); }
+  .tag-top { position: absolute; top: 12px; left: 22px; right: 22px; display: flex; align-items: center; justify-content: space-between; gap: 30px; font-size: 11.5px; font-weight: 700; letter-spacing: -.005em; }
+  .tag-top span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tag-top .of { flex: none; font: 600 11px var(--mono); opacity: .72; }
+  .mat { position: relative; flex: 1 1 0; min-height: 64px; border-radius: 12px; background: #fff; overflow: hidden; }
+  .mat img { position: absolute; inset: 7px; width: calc(100% - 14px); height: calc(100% - 14px); object-fit: contain; animation: imgIn .42s ease-out both; transition: scale .35s var(--spring); }
+  .tag.filled:hover .mat img { scale: 1.045; }
+  @keyframes imgIn { from { opacity: 0; transform: scale(.9); } }
+  .noimg { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; font-size: 44px; color: rgba(20, 19, 17, .13); }
+  .t, .why, .note span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .t { flex: none; min-height: 2lh; font-size: clamp(13.5px, 1.06vw, 15.5px); font-weight: 700; line-height: 1.14; letter-spacing: -.018em; text-wrap: pretty; overflow-wrap: anywhere; }
+  .why { flex: none; min-height: 2lh; font-size: 12.5px; font-weight: 500; line-height: 1.22; color: rgba(20, 19, 17, .84); text-wrap: pretty; }
+  .note { flex: none; min-height: calc(2lh + 14px); padding: 7px 9px; border-radius: 9px; background: var(--soft); font: italic 400 clamp(15px, 1.16vw, 17px)/1.07 var(--serif); }
+  .foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 22px; }
+  .price { flex: none; font: 700 15px var(--mono); letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+  .tag.land .t, .tag.land .why, .tag.land .note, .tag.land .foot { animation: textIn .38s var(--spring) both; }
+  .tag.land .t { animation-delay: .09s; }
+  .tag.land .why { animation-delay: .13s; }
+  .tag.land .note { animation-delay: .17s; }
+  .tag.land .foot { animation-delay: .21s; }
+  @keyframes textIn { from { transform: translateY(7px); opacity: 0; } }
+  .go { min-width: 0; display: inline-flex; align-items: center; gap: 3px; color: inherit; font-size: 11.5px; font-weight: 650; text-decoration: none; }
+  .go b { min-width: 0; font-weight: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .go svg { flex: none; width: 12px; height: 12px; }
+  .go::after { content: ""; position: absolute; inset: 0; }
+  .tag.filled:hover .go b { text-decoration: underline; }
+  .unverified { font-size: 11.5px; font-weight: 650; }
 
-  .speedup { margin-top: 10px; font-size: 15px; font-weight: 700; color: var(--gold); min-height: 22px; }
-  .err { margin-top: 10px; color: #ffb3bc; background: #3b0f1a; border: 1px solid #7a1f33; padding: 8px 10px; border-radius: 10px; display: none; font-size: 13px; }
+  /* The race */
+  .race { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 8px 26px; padding: 13px 20px; border-radius: 20px; background: var(--ink); color: var(--paper); }
+  .lanes { display: grid; gap: 5px; align-content: center; }
+  .lane { display: grid; grid-template-columns: 236px minmax(0, 1fr) 94px; align-items: center; gap: 14px; min-height: 30px; }
+  .lane-name { font-size: 13.5px; font-weight: 650; letter-spacing: -.012em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lane.slow .lane-name { color: var(--night-3); font-weight: 550; }
+  .track { position: relative; height: 12px; border-radius: 99px; background: var(--night-2); overflow: hidden; }
+  .track i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 99px; background: var(--vermilion); }
+  .track i::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 34px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .62)); }
+  .race.finished .track i::after { opacity: 0; transition: opacity .3s; }
+  .lane.slow .track i { background: var(--night-3); }
+  .race.finished .lane.fast .timer { animation: punch .42s var(--spring); }
+  .track::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 calc(20% - 2px), var(--ink) calc(20% - 2px) 20%); }
+  .timer { text-align: right; font: 650 25px/1 var(--mono); letter-spacing: -.055em; font-variant-numeric: tabular-nums; }
+  .timer small { margin-left: 1px; font-size: .56em; color: var(--night-3); letter-spacing: 0; }
+  .lane.fast .timer { color: var(--vermilion); }
+  .lane.slow .timer { color: var(--night-3); }
+  .verdict { position: relative; display: flex; flex-direction: column; justify-content: center; min-width: 0; overflow: hidden; }
+  #slowText { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font: 400 10.5px/1.32 var(--mono); color: var(--night-3); word-break: break-all; }
+  #speedup { display: none; align-items: baseline; gap: 7px; }
+  #speedup b { font-weight: 800; font-size: 44px; line-height: .95; letter-spacing: -.05em; color: var(--butter); font-variation-settings: "opsz" 96; }
+  #speedup span { font-size: 13px; font-weight: 600; line-height: 1.05; }
+  .race.finished #speedup { display: flex; animation: punch .4s var(--spring); }
+  .race.finished #slowText { display: none; }
+  @keyframes punch { from { transform: scale(.7); opacity: 0; } }
+  #gpuNote { grid-column: 1 / -1; font-size: 11px; line-height: 1.3; color: var(--night-3); }
 
-  footer { margin-top: 14px; display: flex; justify-content: space-between; gap: 12px; color: #6f7ba3; font-size: 12px; flex-wrap: wrap; }
+  /* Agent cursor */
+  #cursor { position: fixed; z-index: 20; top: 0; left: 0; display: flex; align-items: flex-start; pointer-events: none; opacity: 0; transition: transform .3s var(--spring), opacity .2s; }
+  #cursor.on { opacity: 1; }
+  #cursor svg { width: 20px; height: 20px; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .3)); }
+  #cursor span { margin: 14px 0 0 -4px; padding: 2px 8px; border-radius: 4px 10px 10px 10px; background: var(--ink); color: var(--paper); font-size: 12px; font-weight: 700; }
 
-  @media (max-width: 1100px) {
-    .lanes { grid-template-columns: 1fr; }
-    .cards { grid-template-columns: repeat(3, 1fr); }
+  /* Desktop: one frame, no scrolling, ready to record */
+  @media (min-width: 1024px) and (min-height: 620px) {
+    .app { height: 100dvh; }
+    body { overflow: hidden; }
+  }
+  @media (min-width: 1024px) and (max-height: 780px) {
+    .bar { height: 50px; }
+    main { gap: 9px; }
+    #prompt { font-size: clamp(34px, 4.6vw, 64px); }
+    .why { display: none; }
+    .race { padding: 9px 18px; }
+    .lane { min-height: 25px; }
+    #speedup b { font-size: 34px; }
+  }
+  @media (max-width: 1280px) and (min-width: 1024px) {
+    .stack span:last-child { display: none; }
+    .lane { grid-template-columns: 226px minmax(0, 1fr) 84px; }
+    .lane-name { font-size: 12.5px; }
+    .race { grid-template-columns: minmax(0, 1fr) 170px; }
+    .live { grid-template-columns: minmax(0, 1fr) auto; }
+    .steps li { padding: 0 9px 0 7px; font-size: 12px; }
+    .steps time { display: none; }
+  }
+
+  /* Tablet and phone: a readable stack */
+  @media (max-width: 1023px) {
+    :root { --gutter: 16px; }
+    .bar { height: 56px; }
+    .stack span:not(:nth-child(2)) { display: none; }
+    main { grid-template-rows: none; }
+    main > .ask, main > .live, main > .line, main > .race { grid-row: auto; }
+    .field { flex-wrap: wrap; }
+    #prompt { flex-basis: 100%; }
+    body[data-state="idle"] #go { width: 100%; justify-content: center; }
+    body:not([data-state="idle"]) .ask { grid-template-columns: minmax(0, 1fr); row-gap: 8px; }
+    body:not([data-state="idle"]) .field { flex-wrap: nowrap; }
+    body:not([data-state="idle"]) #prompt { flex-basis: auto; }
+    body:not([data-state="idle"]) .presets { justify-content: space-between; }
+    body:not([data-state="idle"]) .presets button { width: 44px; height: 44px; }
+    .presets button { height: 44px; }
+    .live { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .pipeline { justify-items: start; }
+    .steps { flex-wrap: wrap; }
+    .chips { justify-content: flex-start; }
+    #cursor { display: none; }
+    .string { display: none; }
+    .tags { height: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .tag, body[data-state="idle"] .tag, .tag.filled:hover { height: auto; margin-top: 0; transform: none; animation: none; filter: none; }
+    .tag.land { animation: rise .34s var(--spring) both; }
+    @keyframes rise { from { transform: translateY(14px); opacity: 0; } }
+    .tag::before { display: none; }
+    .tag-body { min-height: 300px; padding-top: 34px; border-radius: 16px; clip-path: none; -webkit-mask: none; mask: none; }
+    .tag-top { left: 12px; right: 12px; }
+    .mat { flex: none; height: 130px; }
+    .tag.blank .tag-body { min-height: 118px; padding: 8px; }
+    body:not([data-state="idle"]) .tag.blank .tag-body { min-height: 300px; }
+    body[data-state="idle"] .tags { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+    body[data-state="idle"] .tag .tag-body { min-height: 82px; }
+    .blank-n { font-size: 44px; }
+    .race { grid-template-columns: minmax(0, 1fr); padding: 14px; }
+    .lane { grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; }
+    .track { grid-column: 1 / -1; grid-row: 2; }
+    .verdict { min-height: 44px; }
+  }
+  @media (max-width: 560px) {
+    .tags { grid-template-columns: minmax(0, 1fr); }
+    .tag-body { min-height: 0; display: grid; grid-template-columns: 112px minmax(0, 1fr); column-gap: 12px; align-content: start; }
+    .tag-top { position: static; grid-column: 1 / -1; margin-bottom: 4px; }
+    .tag-body { padding-top: 12px; }
+    .mat { grid-row: 2 / span 4; height: 100%; min-height: 124px; }
+    .t, .why, .note, .foot { grid-column: 2; min-height: 0; margin-bottom: 5px; }
+    .foot { margin-bottom: 0; }
+    .tag.blank .tag-body, body:not([data-state="idle"]) .tag.blank .tag-body { display: grid; grid-template-columns: 1fr; align-content: center; min-height: 84px; }
+    body:not([data-state="idle"]) #go { width: 44px; padding: 0; justify-content: center; }
+    body:not([data-state="idle"]) #go span { display: none; }
+    body[data-state="idle"] .verdict { display: none; }
+    body:not([data-state="idle"]) .tag.blank .blank-n { font-size: 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    #cursor { display: none; }
   }
 </style>
 </head>
-<body>
-<canvas id="snow"></canvas>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <h1>🎅 Santa Speedrun <span class="zap">⚡</span></h1>
-      <span class="sub">Describe anyone. Get 5 real gifts from real stores.</span>
-    </div>
-    <div class="pills">
-      <span class="pill"><b>Kimi K3.1 Pro</b> on <b>Cerebras</b></span>
-      <span class="pill">agent: <b>OpenClaw</b></span>
-      <span class="pill">stores: <b>Shopify catalog</b></span>
+<body data-state="idle">
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<canvas id="field" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="app">
+  <header class="bar">
+    <a class="mark" href="/" aria-label="Santa Speedrun home">
+      <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" fill="#ff5a2b"/><path d="M15.8 4 7.6 15.6h5.5L11.5 24 20.4 12h-5.7z" fill="#141311"/></svg>
+      Santa Speedrun
+    </a>
+    <div class="stack" aria-label="Built with">
+      <span style="--dot:var(--lilac)">Kimi K3.1 Pro</span>
+      <span style="--dot:var(--vermilion)">Cerebras</span>
+      <span style="--dot:var(--mint)">OpenClaw</span>
+      <span style="--dot:var(--sky)">Shopify Catalog</span>
     </div>
   </header>
-  <div id="mockBanner">MOCK MODE: offline rehearsal with fake products. Not real AI. Do not record your submission like this.</div>
+  <div id="mockBanner" role="alert">MOCK MODE: fake products, not real AI. Do not record your submission like this.</div>
 
-  <form class="ask" id="ask">
-    <input id="prompt" autocomplete="off" placeholder="Who are you shopping for?  e.g. my dad who says he wants nothing" />
-    <button id="go" type="submit">Find gifts</button>
-  </form>
-  <div class="presets" id="presets"></div>
+  <main>
+    <section class="ask" aria-label="Who are you shopping for">
+      <form id="ask">
+        <label for="prompt">Who's impossible to shop for?</label>
+        <div class="field">
+          <textarea id="prompt" rows="1" maxlength="200" autocomplete="off" spellcheck="false" placeholder="my dad, who wants nothing"></textarea>
+          <button id="go" type="submit" aria-label="Find gifts"><span>Find gifts</span> <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10h13M11 4.5l5.5 5.5-5.5 5.5"/></svg></button>
+        </div>
+      </form>
+      <div class="presets" id="presets" aria-label="Examples"></div>
+    </section>
 
-  <section class="lanes">
-    <div class="lane fast">
-      <div class="lane-head">
-        <div class="lane-title">Kimi K3.1 Pro on Cerebras <small>OpenClaw agent · real search · live</small></div>
-        <div class="timer" id="tFast">0.00<span class="u">s</span></div>
+    <section class="live" aria-label="Live run">
+      <p class="roast" id="roast"></p>
+      <div class="pipeline">
+        <ol class="steps" id="steps">
+          <li><i></i><span>Reads the vibe</span><time></time></li>
+          <li><i></i><span>Searches stores</span><time></time></li>
+          <li><i></i><span>Picks gifts</span><time></time></li>
+          <li><i></i><span>Wraps them</span><time></time></li>
+        </ol>
+        <div class="chips" id="chips"></div>
+        <p id="result"><span id="resultBig"></span><small id="resultSmall"></small></p>
       </div>
-      <div class="status" id="status">Type a person, or press 1–5 for a preset.</div>
-      <div class="chips" id="chips"></div>
-      <div class="roast" id="roast"></div>
-      <div class="cards" id="cards"></div>
-      <div class="result" id="result">
-        <span class="big" id="resultBig"></span>
-        <span class="small" id="resultSmall"></span>
-      </div>
-      <div class="err" id="err"></div>
-    </div>
+      <div id="err" role="alert"></div>
+    </section>
 
-    <div class="lane slow">
-      <div class="lane-head">
-        <div class="lane-title" id="gpuTitle">Typical provider <small id="gpuRate">same output, replayed</small></div>
-        <div class="timer" id="tSlow">0.00<span class="u">s</span></div>
-      </div>
-      <div class="stream" id="slowStream"><span id="slowText"></span></div>
-      <div class="progress"><i id="slowBar"></i></div>
-      <div class="count" id="slowCount">0 / 5 gifts written</div>
-      <div class="speedup" id="speedup"></div>
-      <div class="note" id="gpuNote"></div>
-    </div>
-  </section>
+    <section class="line" aria-label="Five gifts">
+      <svg class="string" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 2Q500 46 1000 2"/></svg>
+      <ol class="tags" id="cards"></ol>
+    </section>
 
-  <footer>
-    <span>Real products from the Shopify Catalog (Shop MCP). Links open the store's own product page.</span>
-    <span>#KimiOnCerebras · @Cerebras · @Kimi_Moonshot · OpenClaw</span>
-  </footer>
+    <section class="race" id="race" aria-label="Speed comparison">
+      <div class="lanes">
+        <div class="lane fast">
+          <div class="lane-name" id="fastName">Kimi K3.1 Pro on Cerebras</div>
+          <div class="track"><i id="fastBar"></i></div>
+          <div class="timer" id="tFast">0.00<small>s</small></div>
+        </div>
+        <div class="lane slow">
+          <div class="lane-name" id="gpuTitle">Median Kimi API, replayed</div>
+          <div class="track"><i id="slowBar"></i></div>
+          <div class="timer" id="tSlow">0.00<small>s</small></div>
+        </div>
+      </div>
+      <div class="verdict">
+        <code id="slowText"></code>
+        <div id="speedup"><b id="speedX"></b><span>sooner<br />than median</span></div>
+      </div>
+      <p id="gpuNote"></p>
+    </section>
+  </main>
 </div>
+
+<div id="cursor" aria-hidden="true">
+  <svg viewBox="0 0 20 20"><path d="M2 1.5 17.5 8l-6.6 2.2L8 17z" fill="#ff5a2b" stroke="#141311" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  <span>Kimi</span>
+</div>
+<div class="sr" id="status" role="status" aria-live="polite"></div>
 
 <script>
 const PRESETS = [
-  "My dad, 58, says he wants nothing for Christmas",
-  "@Cerebras: a company whose chip is the size of a dinner plate",
-  "@Kimi_Moonshot: an AI that lives on the moon and reads a million tokens for fun",
-  "My roommate who has 300 browser tabs open at all times",
-  "My sister who just ran her first 5K and won't stop talking about it",
+  { label: "Dad who wants nothing", prompt: "My dad, 58, says he wants nothing for Christmas" },
+  { label: "@Cerebras", prompt: "@Cerebras: a company whose chip is the size of a dinner plate" },
+  { label: "@Kimi_Moonshot", prompt: "@Kimi_Moonshot: an AI that lives on the moon and reads a million tokens for fun" },
+  { label: "Roommate with 300 tabs", prompt: "My roommate who has 300 browser tabs open at all times" },
+  { label: "Sister, first 5K", prompt: "My sister who just ran her first 5K and won't stop talking about it" },
 ];
+const PLACEHOLDERS = [
+  "my dad, who wants nothing",
+  "a roommate with 300 tabs",
+  "my boss, who owns a boat",
+  "a cat with a blue check",
+  "my sister, one 5K later",
+];
+const COLORS = ["var(--vermilion)", "var(--butter)", "var(--lilac)", "var(--mint)", "var(--sky)"];
+const HEX = ["#ff5630", "#ffc92e", "#ac9bff", "#4ed8a2", "#78c9ff"];
+const STEP_LABEL = "Reads the vibe";
 const CHARS_PER_TOKEN = 4; // conservative: more chars per token = faster replay for the other lane
+const ARROW = `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l6-6M4 3h5v5"/></svg>`;
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : "");
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
 const fmt = (ms) => (ms / 1000).toFixed(2);
+const secs = (ms) => `${fmt(ms)}<small>s</small>`;
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-let CFG = { mock: false, gpu: { tps: 112.2, label: "Typical provider", source: "" } };
+let CFG = { mock: false, gpu: { tps: 112.2, label: "Median Kimi API", source: "" } };
 let run = null;
+
+// ---------- prompt ----------
+function fit() {
+  const p = $("prompt");
+  p.style.height = "auto";
+  p.style.height = `${p.scrollHeight}px`;
+}
+function settle() {
+  const until = performance.now() + 340;
+  (function step() { fit(); if (performance.now() < until) requestAnimationFrame(step); })();
+}
+function setState(s) {
+  if (document.body.dataset.state === s) return;
+  document.body.dataset.state = s;
+  settle();
+}
+$("prompt").addEventListener("input", fit);
+$("prompt").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("ask").requestSubmit(); }
+});
+addEventListener("resize", fit);
+document.fonts?.ready.then(fit);
+
+if (!calm) {
+  let ph = 0;
+  setInterval(() => {
+    if (document.body.dataset.state !== "idle" || $("prompt").value) return;
+    ph = (ph + 1) % PLACEHOLDERS.length;
+    $("prompt").placeholder = PLACEHOLDERS[ph];
+    fit();
+  }, 2400);
+}
 
 // ---------- presets ----------
 PRESETS.forEach((p, i) => {
   const b = document.createElement("button");
   b.type = "button";
-  b.innerHTML = `<kbd>${i + 1}</kbd>${esc(p)}`;
-  b.onclick = () => { $("prompt").value = p; start(p); };
+  b.title = p.prompt;
+  b.setAttribute("aria-label", p.prompt);
+  b.style.setProperty("--c", COLORS[i]);
+  b.innerHTML = `<kbd>${i + 1}</kbd><span>${esc(p.label)}</span>`;
+  b.onclick = () => choose(p.prompt);
   $("presets").appendChild(b);
 });
+function choose(text) { $("prompt").value = text; fit(); start(text); }
 document.addEventListener("keydown", (e) => {
-  if (document.activeElement === $("prompt")) return;
+  if (document.activeElement === $("prompt") || e.metaKey || e.ctrlKey || e.altKey) return;
   const n = Number(e.key);
-  if (n >= 1 && n <= PRESETS.length) { $("prompt").value = PRESETS[n - 1]; start(PRESETS[n - 1]); }
+  if (n >= 1 && n <= PRESETS.length) choose(PRESETS[n - 1].prompt);
   if (e.key === "/") { e.preventDefault(); $("prompt").focus(); }
 });
-$("ask").addEventListener("submit", (e) => { e.preventDefault(); const p = $("prompt").value.trim(); if (p) start(p); $("prompt").blur(); });
+$("ask").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const p = $("prompt").value.trim();
+  if (p) start(p);
+  $("prompt").blur();
+});
 
 fetch("/api/config").then((r) => r.json()).then((c) => {
   CFG = c;
   $("mockBanner").style.display = c.mock ? "block" : "none";
-  if (c.mock) document.querySelector(".fast .lane-title small").textContent = "MOCK MODE · fake products · not real AI";
-  $("gpuTitle").innerHTML = `${esc(c.gpu.label)} <small id="gpuRate">same output, replayed at ${c.gpu.tps} tok/s</small>`;
+  if (c.mock) $("fastName").textContent = "MOCK, not real AI";
+  $("gpuTitle").textContent = `${c.gpu.label}, replayed`;
   $("gpuNote").textContent =
-    `Replay of the exact same answer at ${c.gpu.tps} output tok/s (${c.gpu.source}). ` +
-    `Conservative: this lane gets Cerebras's head start (same search time and first-token time) and only the final answer is replayed.`;
+    `Bottom lane replays this exact answer at ${c.gpu.tps} tok/s (${c.gpu.source}). ` +
+    `It keeps the same search and first-token time, so the comparison is conservative.`;
 });
 
 // ---------- streaming JSON helpers ----------
@@ -256,58 +549,148 @@ function completeGifts(buf) {
 }
 
 // ---------- rendering ----------
+const blankTag = (i) => `<li class="tag blank" style="--d:${i}"><div class="tag-body"><span class="blank-n">${i + 1}</span></div></li>`;
+
 function resetUi() {
   $("chips").innerHTML = "";
   $("roast").textContent = "";
-  $("cards").innerHTML = Array.from({ length: 5 }, () => `<div class="card ph">🎁</div>`).join("");
-  $("result").style.display = "none";
+  $("roast").style.fontSize = "";
+  $("roast").classList.remove("typing");
+  $("steps").children[0].querySelector("span").textContent = STEP_LABEL;
+  $("cards").innerHTML = Array.from({ length: 5 }, (_, i) => blankTag(i)).join("");
   $("err").style.display = "none";
   $("slowText").textContent = "";
   $("slowBar").style.width = "0%";
-  $("slowCount").textContent = "0 / 5 gifts written";
-  $("speedup").textContent = "";
-  $("tFast").innerHTML = `0.00<span class="u">s</span>`;
-  $("tSlow").innerHTML = `0.00<span class="u">s</span>`;
+  $("fastBar").style.width = "0%";
+  $("race").classList.remove("finished");
+  $("tFast").innerHTML = secs(0);
+  $("tSlow").innerHTML = secs(0);
+  [...$("steps").children].forEach((li) => { li.className = ""; li.querySelector("time").textContent = ""; });
 }
 
-function setStatus(html) { $("status").innerHTML = html; }
+function setStep(r, n) {
+  const at = fmt(performance.now() - r.clickAt);
+  [...$("steps").children].forEach((li, i) => {
+    if (i < n) {
+      if (!li.classList.contains("done")) li.querySelector("time").textContent = at;
+      li.className = "done";
+    } else {
+      li.className = i === n ? "active" : "";
+    }
+  });
+}
+function say(text) { $("status").textContent = text; }
+
+function setRoast(text, typing) {
+  const el = $("roast");
+  el.textContent = text;
+  el.classList.toggle("typing", !!typing);
+  // Keep the roast on two lines by easing the size down instead of cutting words off.
+  let size = parseFloat(getComputedStyle(el).fontSize);
+  while (el.scrollHeight > size * 1.07 * 2 + 3 && size > 18) {
+    size -= 1;
+    el.style.fontSize = `${size}px`;
+  }
+}
+
+function setBusy(busy) {
+  $("go").disabled = busy;
+  $("go").querySelector("span").textContent = busy ? "Finding" : "Find gifts";
+}
+
+function niceTitle(s) {
+  let t = String(s || "").replace(/\s+/g, " ").trim();
+  // Store titles are often SEO strings. Trim only what won't fit in two lines, at a natural break.
+  if (t.length > 54) {
+    for (const cut of [/,\s+/, /\s+with\s+/i, /\s+(?:for|featuring)\s+/i, /\s+[-–—|:]\s+/]) {
+      const head = t.split(cut)[0];
+      if (head.length >= 16 && head.length < t.length) t = head;
+      if (t.length <= 54) break;
+    }
+  }
+  if (t === t.toUpperCase() && /[A-Z]{3}/.test(t)) t = t.toLowerCase().replace(/(^|\s)(\p{L})/gu, (m, a, c) => a + c.toUpperCase());
+  return t;
+}
+
+// The cursor sits under a pill, or over a tag's photo, so it never covers the text it points at.
+function pointAt(el, below) {
+  if (!el || calm) return;
+  const b = el.getBoundingClientRect();
+  const x = Math.min(innerWidth - 84, Math.round(b.left + b.width * (below ? .5 : .68)));
+  const y = Math.round(below ? b.bottom + 3 : b.top + Math.min(b.height * .26, 104));
+  $("cursor").style.transform = `translate(${x}px, ${y}px)`;
+  $("cursor").classList.add("on");
+}
+function hideCursor(delay = 0) { setTimeout(() => { if (!run || run.fastDoneAt || run.failed) $("cursor").classList.remove("on"); }, delay); }
+
+// Photos, prices and links come only from real search results, never from model text.
+function productFor(r, g) {
+  return r.products[g.id] || Object.values(r.products).find((p) => p.url && p.url === g.url) || null;
+}
 
 function renderCards(gifts) {
   const cards = $("cards").children;
+  let last = null;
   gifts.slice(0, 5).forEach((g, i) => {
     const el = cards[i];
     if (!el || el.dataset.id === String(g.id)) return;
-    const p = run.products[g.id] || {};
-    const url = safeUrl(p.url) || safeUrl(g.url);
-    const img = p.image ? `style="background-image:url('${esc(p.image)}')"` : "";
-    el.className = "card pop";
+    const p = productFor(run, g);
+    const url = p ? safeUrl(p.url) : "";
+    const image = p ? safeUrl(p.image) : "";
+    const store = p?.store || g.store || "";
+    el.className = "tag filled land";
     el.dataset.id = String(g.id);
+    const fullTitle = p?.title || g.title;
     el.innerHTML = `
-      <span class="n">${i + 1}</span>
-      <div class="img" ${img}>${p.image ? "" : "🎁"}</div>
-      <div class="body">
-        <div class="title">${esc(p.title || g.title)}</div>
-        <div class="meta"><b>${esc(p.price || g.price)}</b> · ${esc(p.store || g.store)}</div>
-        <div class="why">${esc(g.why)}</div>
-        <div class="tag">${g.tag ? "“" + esc(g.tag) + "”" : ""}</div>
-        ${url ? `<a class="go" href="${esc(url)}" target="_blank" rel="noopener noreferrer">↗ ${esc(host(url))}</a>` : ""}
+      <div class="tag-body">
+        <div class="tag-top"><span title="${esc(store)}">${esc(store)}</span><span class="of">${i + 1}/5</span></div>
+        <div class="mat">${image ? `<img src="${esc(image)}" alt="" decoding="async" referrerpolicy="no-referrer" />` : `<span class="noimg">${i + 1}</span>`}</div>
+        <h3 class="t" title="${esc(fullTitle)}">${esc(niceTitle(fullTitle))}</h3>
+        <p class="why">${esc(g.why)}</p>
+        <p class="note"><span>${g.tag ? `“${esc(g.tag)}”` : ""}</span></p>
+        <div class="foot">
+          <span class="price">${esc(p?.price || g.price)}</span>
+          ${url
+            ? `<a class="go" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><b>${esc(host(url))}</b>${ARROW}</a>`
+            : `<span class="unverified">${r_isMock() ? "mock item" : "link unverified"}</span>`}
+        </div>
       </div>`;
+    el.querySelector("img")?.addEventListener("error", (e) => {
+      e.target.replaceWith(Object.assign(document.createElement("span"), { className: "noimg", textContent: String(i + 1) }));
+    }, { once: true });
+    // Child animations bubble here too, so wait for the tag's own swing to finish.
+    const landed = (e) => {
+      if (e.target !== el) return;
+      el.classList.remove("land");
+      el.removeEventListener("animationend", landed);
+    };
+    el.addEventListener("animationend", landed);
+    const b = el.getBoundingClientRect();
+    field.pulse(b.left + b.width / 2, b.top + 18, HEX[i]);
+    confetti.burst(b.left + b.width / 2, b.top + 18, 5, [HEX[i]]);
+    last = el;
   });
+  if (last) pointAt(last);
 }
+function r_isMock() { return !!run?.mock; }
 
 // ---------- the run ----------
 async function start(prompt) {
   if (run?.controller) run.controller.abort();
+  setState("running");
   resetUi();
   const controller = new AbortController();
   run = {
     controller, prompt, products: {}, buf: "", shown: 0,
     clickAt: performance.now(), fastDoneAt: null, firstContentAt: null, slowDoneAt: null,
-    serverFirstContent: null, serverDone: null, usage: null, mock: false,
+    usage: null, mock: false, failed: false,
   };
   const me = run;
-  $("go").disabled = true;
-  setStatus("🧠 <b>Kimi is reading the vibe…</b>");
+  setBusy(true);
+  [...$("presets").children].forEach((b) => b.classList.toggle("on", b.title === prompt));
+  setStep(me, 0);
+  say("Reading the vibe");
+  pointAt($("steps").children[0], true);
   requestAnimationFrame(tick);
 
   try {
@@ -331,9 +714,9 @@ async function start(prompt) {
       }
     }
   } catch (e) {
-    if (e.name !== "AbortError") showError(e.message);
+    if (e.name !== "AbortError" && run === me) showError(e.message);
   } finally {
-    if (run === me) $("go").disabled = false;
+    if (run === me) setBusy(false);
   }
 }
 
@@ -342,60 +725,75 @@ function onEvent(r, ev, d) {
   if (ev === "start") { r.mock = d.mode === "mock"; return; }
   if (ev === "tool") return onTool(r, d);
   if (ev === "delta") {
-    if (r.firstContentAt == null) { r.firstContentAt = performance.now(); r.serverFirstContent = d.t; setStatus("🎁 <b>Wrapping gifts…</b>"); }
+    if (r.firstContentAt == null) { r.firstContentAt = performance.now(); setStep(r, 3); say("Wrapping gifts"); }
     r.buf += d.text;
-    $("roast").textContent = partialRoast(r.buf);
+    const roast = partialRoast(r.buf);
+    if (roast !== r.roast) { r.roast = roast; setRoast(roast, !r.buf.includes('"gifts"')); }
+    else if (r.buf.includes('"gifts"')) $("roast").classList.remove("typing");
     const gifts = completeGifts(r.buf);
     if (gifts.length !== r.shown) { r.shown = gifts.length; renderCards(gifts); }
     return;
   }
   if (ev === "usage") { r.usage = d.usage; return; }
-  if (ev === "done") return finishFast(r, d.t);
+  if (ev === "done") return finishFast(r);
   if (ev === "fail") return showError(d.message);
 }
 
 function onTool(r, d) {
   if (d.type === "search_start") {
-    setStatus(`🔎 <b>Searching ${d.queries.length} real stores at once…</b>`);
-    $("chips").innerHTML = d.queries.map((q, i) => `<span class="chip" data-i="${i}">${esc(q)}</span>`).join("");
+    r.toolSeen = true;
+    $("steps").children[0].querySelector("span").textContent = STEP_LABEL;
+    setStep(r, 1);
+    say(`Searching ${d.queries.length} real stores at once`);
+    $("chips").innerHTML = d.queries.map((q, i) => `<span class="chip" data-i="${i}" title="${esc(q)}" style="--c:${COLORS[i % 5]};--n:${i}">${esc(q)}</span>`).join("");
+    pointAt($("chips"), true);
   } else if (d.type === "search_done" || d.type === "search_error") {
     (d.items || []).forEach((p) => (r.products[p.id] = p));
     const chip = $("chips").querySelector(`[data-i="${d.index}"]`);
     if (chip) chip.classList.add(d.type === "search_done" ? "done" : "err");
   } else if (d.type === "search_all_done") {
-    setStatus(`📦 <b>${d.count} real products found in ${d.ms} ms.</b> Kimi is picking…`);
+    setStep(r, 2);
+    say(`${d.count} real products found. Picking the best`);
   }
 }
 
-function finishFast(r, serverT) {
+function finishFast(r) {
   r.fastDoneAt = performance.now();
-  r.serverDone = serverT;
   const gifts = completeGifts(r.buf);
   renderCards(gifts);
   if (!gifts.length) {
-    showError("The agent didn't return gift JSON. Raw answer:\n" + r.buf.slice(0, 600));
+    showError("The agent didn't return gift JSON. Try that one again.");
     return;
   }
   const total = r.fastDoneAt - r.clickAt;
-  const streamMs = r.fastDoneAt - (r.firstContentAt ?? r.fastDoneAt);
-  const outTok = r.usage?.completion_tokens;
-  const estTps = streamMs > 150 ? Math.round(r.buf.length / CHARS_PER_TOKEN / (streamMs / 1000)) : null;
-  setStatus(`✅ <b>Done.</b> ${r.mock ? "<b style='color:var(--red)'>MOCK</b>" : ""}`);
-  $("tFast").innerHTML = `${fmt(total)}<span class="u">s</span>`;
-  $("resultBig").textContent = `${gifts.length} ${r.mock ? "MOCK" : "real"} gifts in ${fmt(total)} s`;
-  r.streamMs = streamMs;
-  $("resultSmall").textContent = [
-    outTok ? `${outTok} output tokens` : "",
-    estTps ? `≈${estTps.toLocaleString()} tok/s answer stream` : (r.firstContentAt ? `answer streamed in ${Math.round(streamMs)} ms` : ""),
-  ].filter(Boolean).join(" · ");
-  $("result").style.display = "flex";
+  setStep(r, 4);
+  setState("done");
+  $("tFast").innerHTML = secs(total);
+  $("fastBar").style.width = "100%";
+  $("resultBig").textContent = `${gifts.length} ${r.mock ? "mock" : "real"} gifts in ${fmt(total)}s`;
+  $("resultSmall").textContent = r.usage?.completion_tokens ? `${r.usage.completion_tokens} tokens` : "";
+  say($("resultBig").textContent);
+  $("roast").classList.remove("typing");
+  hideCursor(700);
+  setTimeout(() => {
+    if (run !== r) return;
+    [...$("cards").children].forEach((el, i) => {
+      const b = el.getBoundingClientRect();
+      confetti.burst(b.left + b.width / 2, b.top + 18, 7, HEX);
+      field.pulse(b.left + b.width / 2, b.top + 18, HEX[i]);
+    });
+  }, 260);
 }
 
 function showError(msg) {
-  $("err").textContent = "⚠️ " + msg;
-  $("err").style.display = "block";
-  setStatus("Something went wrong. See below.");
   if (run) run.failed = true;
+  setState("error");
+  $("err").textContent = msg;
+  $("err").style.display = "block";
+  setBusy(false);
+  $("roast").classList.remove("typing");
+  $("cursor").classList.remove("on");
+  say("Something went wrong");
 }
 
 // ---------- the replay lane + timers ----------
@@ -403,7 +801,16 @@ function tick() {
   const r = run;
   if (!r) return;
   const now = performance.now();
-  if (!r.fastDoneAt && !r.failed) $("tFast").innerHTML = `${fmt(now - r.clickAt)}<span class="u">s</span>`;
+  if (!r.fastDoneAt && !r.failed) {
+    if (!r.toolSeen && !r.queueShown && now - r.clickAt > 7000) {
+      r.queueShown = true;
+      $("steps").children[0].querySelector("span").textContent = "Waiting in Cerebras queue";
+      say("Waiting in the Cerebras queue");
+    }
+    $("tFast").innerHTML = secs(now - r.clickAt);
+    const target = Math.max(r.buf.length, 1800);
+    $("fastBar").style.width = `${Math.min(100, (r.buf.length / target) * 100)}%`;
+  }
 
   let slowDone = !!r.slowDoneAt;
   if (!slowDone && !r.failed) {
@@ -413,9 +820,7 @@ function tick() {
       revealed = Math.floor(((now - r.firstContentAt) / 1000) * cps);
     }
     const text = r.buf.slice(0, revealed);
-    $("slowText").textContent = text;
-    const n = Math.min(5, completeGifts(text).length);
-    $("slowCount").textContent = `${n} / 5 gifts written`;
+    $("slowText").textContent = text.slice(-96);
     const target = r.fastDoneAt ? r.buf.length : Math.max(r.buf.length, 1800);
     $("slowBar").style.width = `${Math.min(100, (text.length / target) * 100)}%`;
     if (r.fastDoneAt && revealed >= r.buf.length && r.buf.length > 0) {
@@ -423,33 +828,153 @@ function tick() {
       slowDone = true;
       const slowTotal = r.slowDoneAt - r.clickAt;
       const fastTotal = r.fastDoneAt - r.clickAt;
-      $("tSlow").innerHTML = `${fmt(slowTotal)}<span class="u">s</span>`;
-      $("slowCount").textContent = `5 / 5 gifts written`;
-      const slowWrite = r.slowDoneAt - r.firstContentAt;
-      const writeX = r.streamMs > 80 ? ` · answer written ${(slowWrite / r.streamMs).toFixed(0)}× faster` : "";
-      $("speedup").textContent = `Cerebras finished ${(slowTotal / fastTotal).toFixed(1)}× sooner (${fmt(slowTotal - fastTotal)} s ahead)${writeX}`;
+      $("tSlow").innerHTML = secs(slowTotal);
+      $("slowBar").style.width = "100%";
+      $("speedX").textContent = `${(slowTotal / fastTotal).toFixed(1)}×`;
+      $("race").classList.add("finished");
     } else {
-      $("tSlow").innerHTML = `${fmt(now - r.clickAt)}<span class="u">s</span>`;
+      $("tSlow").innerHTML = secs(now - r.clickAt);
     }
   }
   if (!(r.fastDoneAt && slowDone) && !r.failed) requestAnimationFrame(tick);
 }
 
-// ---------- gentle snow ----------
-(() => {
-  const c = $("snow"), ctx = c.getContext("2d");
-  let flakes = [];
-  const resize = () => { c.width = innerWidth; c.height = innerHeight; flakes = Array.from({ length: 70 }, () => ({ x: Math.random() * c.width, y: Math.random() * c.height, r: Math.random() * 1.8 + 0.4, s: Math.random() * 0.5 + 0.2 })); };
-  addEventListener("resize", resize); resize();
-  (function loop() {
-    ctx.clearRect(0, 0, c.width, c.height);
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
-    for (const f of flakes) { f.y += f.s; f.x += Math.sin(f.y / 40) * 0.2; if (f.y > c.height) { f.y = -4; f.x = Math.random() * c.width; } ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill(); }
+// ---------- living dot field: drifts slowly, ripples in a tag's color when a gift lands ----------
+const field = (() => {
+  const canvas = $("field");
+  const ctx = canvas.getContext("2d");
+  const FRAME = 1000 / 24;
+  const LEVELS = 6;
+  const ripples = [];
+  const pointer = { x: -9999, y: -9999 };
+  let w = 0, h = 0, dpr = 1, step = 24, dots = [], last = 0;
+
+  function size() {
+    dpr = Math.min(devicePixelRatio || 1, 1.25);
+    w = innerWidth; h = innerHeight;
+    step = w < 640 ? 26 : 24;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    dots = [];
+    for (let y = step / 2; y < h + step; y += step) for (let x = step / 2; x < w + step; x += step) dots.push(x, y);
+    if (calm) draw(0);
+  }
+
+  function draw(now) {
+    const t = now / 1000;
+    while (ripples.length && now - ripples[0].at > 1500) ripples.shift();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const levels = Array.from({ length: LEVELS }, () => new Path2D());
+    const tints = new Map();
+    for (let i = 0; i < dots.length; i += 2) {
+      const x = dots[i], y = dots[i + 1];
+      let v = (Math.sin(x * .0062 + t * .42) + Math.sin(y * .0083 - t * .33) + Math.sin((x + y) * .0041 + t * .21) + 3) / 6;
+      const px = x - pointer.x, py = y - pointer.y, near = px * px + py * py;
+      if (near < 19600) v += (1 - near / 19600) * .55;
+      let tint = null;
+      for (const r of ripples) {
+        const age = (now - r.at) / 1000;
+        const off = Math.abs(Math.hypot(x - r.x, y - r.y) - age * 560);
+        if (off < 74) {
+          const s = (1 - off / 74) * Math.max(0, 1 - age / 1.4);
+          v += s * 1.1;
+          if (s > .22) tint = r.color;
+        }
+      }
+      const radius = .7 + Math.min(v, 1.7) * 1.05;
+      const path = tint ? (tints.get(tint) || tints.set(tint, new Path2D()).get(tint)) : levels[Math.min(LEVELS - 1, Math.floor(v * LEVELS))];
+      path.moveTo(x + radius, y);
+      path.arc(x, y, radius, 0, 6.2832);
+    }
+    levels.forEach((path, i) => { ctx.fillStyle = `rgba(20, 19, 17, ${(.075 + i * .034).toFixed(3)})`; ctx.fill(path); });
+    for (const [color, path] of tints) { ctx.fillStyle = color; ctx.fill(path); }
+  }
+
+  function loop(now) {
     requestAnimationFrame(loop);
-  })();
+    if (document.hidden || now - last < FRAME) return;
+    last = now;
+    draw(now);
+  }
+
+  addEventListener("resize", size);
+  if (!calm) addEventListener("pointermove", (e) => { pointer.x = e.clientX; pointer.y = e.clientY; }, { passive: true });
+  size();
+  if (!calm) requestAnimationFrame(loop);
+  return {
+    pulse(x, y, color) {
+      if (calm) return;
+      ripples.push({ x, y, color, at: performance.now() });
+      if (ripples.length > 7) ripples.shift();
+    },
+  };
+})();
+
+// ---------- paper confetti: small bursts, gone in under two seconds ----------
+const confetti = (() => {
+  const canvas = $("confetti");
+  const ctx = canvas.getContext("2d");
+  let bits = [], frame = 0, last = 0, dpr = 1;
+
+  function size() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(innerWidth * dpr);
+    canvas.height = Math.round(innerHeight * dpr);
+  }
+
+  function loop(now) {
+    const dt = Math.min(.034, (now - last) / 1000);
+    last = now;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    bits = bits.filter((b) => (b.age += dt) < b.ttl);
+    for (const b of bits) {
+      b.vy += 640 * dt;
+      b.vx *= 1 - 1.5 * dt;
+      b.vy *= 1 - 1.1 * dt;
+      b.x += (b.vx + Math.sin(b.age * b.wob + b.phase) * 26) * dt;
+      b.y += b.vy * dt;
+      b.rot += b.spin * dt;
+      const left = b.ttl - b.age;
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, left / .45);
+      ctx.translate(b.x, b.y);
+      ctx.rotate(b.rot);
+      ctx.scale(1, Math.cos(b.age * b.flip));
+      ctx.fillStyle = b.color;
+      if (b.round) { ctx.beginPath(); ctx.arc(0, 0, b.w / 2, 0, 6.2832); ctx.fill(); }
+      else ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+      ctx.restore();
+    }
+    if (bits.length) frame = requestAnimationFrame(loop);
+    else { frame = 0; ctx.clearRect(0, 0, innerWidth, innerHeight); }
+  }
+
+  addEventListener("resize", size);
+  size();
+  return {
+    burst(x, y, count, colors) {
+      if (calm) return;
+      for (let i = 0; i < count; i++) {
+        const angle = -Math.PI / 2 + (Math.random() - .5) * 1.9;
+        const speed = 130 + Math.random() * 250;
+        bits.push({
+          x, y, age: 0, ttl: 1.05 + Math.random() * .75,
+          vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          rot: Math.random() * 6.28, spin: (Math.random() - .5) * 9,
+          flip: 5 + Math.random() * 7, wob: 3 + Math.random() * 3, phase: Math.random() * 6.28,
+          w: 4 + Math.random() * 4, h: 7 + Math.random() * 5, round: Math.random() < .22,
+          color: colors[Math.floor(Math.random() * colors.length)],
+        });
+      }
+      if (!frame) { last = performance.now(); frame = requestAnimationFrame(loop); }
+    },
+  };
 })();
 
 resetUi();
+fit();
 </script>
 </body>
 </html>
